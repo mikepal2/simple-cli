@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace SnapCLI
         /// <param name = "parseResult">Command line parse result.</param>
         /// <param name = "mutuallyExclusiveOptionsArguments">List of mutually exclusive options/arguments names. If there are multiple groups of mutually exclusive options/arguments, they must be enclosed in parentheses. Example: (option1,option2)(option3,arg1).</param>
         /// <param name = "commands">Optional list of commands this validation applies. If not specified, validation applies to all commands.</param>
-        /// <exception cref = "ArgumentException">When there are mutually exclusive options found on command line.</exception>
+        /// <exception cref = "CommandLineInputException">When there are mutually exclusive options found on command line.</exception>
         /// <exception cref = "ArgumentNullException">Option name or command name is <code>null</code>.</exception>
         public static void ValidateMutuallyExclusiveOptionsArguments(this ParseResult parseResult, string mutuallyExclusiveOptionsArguments, string[]? commands = null)
         {
@@ -55,7 +56,8 @@ namespace SnapCLI
         /// <param name = "parseResult">Command line parse result.</param>
         /// <param name = "mutuallyExclusiveOptionsArguments">List of mutually exclusive options/arguments names.</param>
         /// <param name = "commands">Optional list of commands this validation applies. If not specified, validation applies to all commands.</param>
-        /// <exception cref = "ArgumentException">When there are mutually exclusive options found on command line.</exception>
+        /// <exception cref = "CommandLineInputException">When there are mutually exclusive options found on command line.</exception>
+        /// <exception cref = "AttributeUsageException">When a name does not match any option or argument reachable from the current command.</exception>
         /// <exception cref = "ArgumentNullException">Option name or command name is <code>null</code>.</exception>
         public static void ValidateMutuallyExclusiveOptionsArguments(this ParseResult parseResult, string[] mutuallyExclusiveOptionsArguments, string[]? commands = null)
         {
@@ -73,6 +75,8 @@ namespace SnapCLI
                 }
             }
 
+            ValidateNamesAreKnown(parseResult, mutuallyExclusiveOptionsArguments);
+
             var commandLineArgs = parseResult.RootCommandResult.Children // cannot access option.IsGlobal(), assume all options of root command are global options
                     .Concat(parseResult.CommandResult.Children) // command options
                     .Select(r =>
@@ -82,7 +86,7 @@ namespace SnapCLI
                             && mutuallyExclusiveOptionsArguments.Any(name => argResult.Argument.NameEquals(name ?? throw new ArgumentNullException(nameof(name)))))
                             return $"argument '{argResult.Argument.Name}'";
                         if (r is OptionResult optResult
-                            && !optResult.IsImplicit
+                            && !optResult.Implicit
                             && mutuallyExclusiveOptionsArguments.Any(name => optResult.Option.NameEquals(name ?? throw new ArgumentNullException(nameof(name)))))
                             return $"option '{optResult.Option.Name}'";
                         return null;
@@ -92,7 +96,28 @@ namespace SnapCLI
                     .ToArray();
 
             if (commandLineArgs.Length > 1)
-                throw new ArgumentException($"{commandLineArgs[0]} and {commandLineArgs[1]} are mutually exclusive for command '{parseResult.CommandResult.Command.FullName()}'");
+                throw new CommandLineInputException($"{commandLineArgs[0]} and {commandLineArgs[1]} are mutually exclusive for command '{parseResult.CommandResult.Command.FullName()}'");
+        }
+
+        // A misspelled name would otherwise make the whole check silently pass, so reject names that
+        // match nothing on the current command or on any of its ancestors (recursive/global options).
+        private static void ValidateNamesAreKnown(ParseResult parseResult, string[] names)
+        {
+            var known = new List<Symbol>();
+            for (Command? command = parseResult.CommandResult.Command; command != null; command = command.Parents.OfType<Command>().FirstOrDefault())
+            {
+                known.AddRange(command.Options);
+                known.AddRange(command.Arguments);
+            }
+
+            foreach (var name in names)
+            {
+                if (name == null)
+                    throw new ArgumentNullException(nameof(names));
+                if (!known.Any(symbol => symbol.NameEquals(name)))
+                    throw new AttributeUsageException(
+                        $"'{name}' listed as mutually exclusive is not an option or argument of command '{parseResult.CommandResult.Command.FullName()}'");
+            }
         }
 
         /// <summary>
@@ -155,7 +180,7 @@ namespace SnapCLI
             {
                 case Option opt:
                     name = name.TrimStart('-');
-                    return opt.Aliases.Any(alias => alias.TrimStart('-') == name);
+                    return opt.Name.TrimStart('-') == name || opt.Aliases.Any(alias => alias.TrimStart('-') == name);
                 case Command command:
                     if (command.Aliases.Any(alias => alias == name))
                         return true;

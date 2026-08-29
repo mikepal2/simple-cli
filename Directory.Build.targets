@@ -1,0 +1,9 @@
+<Project>
+
+	<!-- Exclude stale generated files from a project-local obj/ (created by standalone builds
+	     when SolutionDir was undefined and BaseIntermediateOutputPath resolved locally). -->
+	<ItemGroup>
+		<Compile Remove="$(MSBuildProjectDirectory)\obj\**" />
+	</ItemGroup>
+
+</Project>

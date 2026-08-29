@@ -5,6 +5,13 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<OutputType>Exe</OutputType>
+		<!--
+		This sample declares a top level 'quotes' command, so the executable cannot also be named
+		'quotes': System.CommandLine builds one token table from the root command name and its
+		subcommand names, and the duplicate would make every parse fail. 'scl' matches the
+		executable name used by the System.CommandLine tutorial this sample is based on.
+		-->
+		<AssemblyName>scl</AssemblyName>
 	</PropertyGroup>
 
 	<!-- 

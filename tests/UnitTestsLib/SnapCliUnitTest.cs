@@ -27,6 +27,10 @@ namespace Tests
 
                     ResetValuesFromCache();
 
+                    // Restoring cached values invokes property setters, which may write to Out.
+                    // Discard that so the assertions only see output produced by the run itself.
+                    Out.GetStringBuilder().Clear();
+
                     switch (useExceptionHandler)
                     {
                         case UseExceptionHandler.Default: break;

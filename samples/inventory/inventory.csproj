@@ -5,9 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<OutputType>Exe</OutputType>
-		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
-		<BaseIntermediateOutputPath>$(SolutionDir)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
-		<IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+		<!-- Output paths are set for every project by Directory.Build.props at the repository root. -->
 	</PropertyGroup>
 
 	<!-- 

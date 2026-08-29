@@ -30,18 +30,24 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+    # Release, so that the binaries that ship in the package are optimized.
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --configuration Release --no-restore
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    - name: Pack
+      run: dotnet pack src/SnapCLI.csproj --configuration Release --no-build --output artifacts
 
     - name: Release
       uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/v')
       with:
-        files: "**/*.nupkg"
+        files: |
+          artifacts/*.nupkg
+          artifacts/*.snupkg
 
     - name: Publish
       if: startsWith(github.ref, 'refs/tags/v')
-      run: dotnet nuget push **/*.nupkg --source 'https://api.nuget.org/v3/index.json' --api-key ${{secrets.NUGET_API_KEY}}
+      run: dotnet nuget push "artifacts/*.nupkg" --source 'https://api.nuget.org/v3/index.json' --api-key ${{secrets.NUGET_API_KEY}}

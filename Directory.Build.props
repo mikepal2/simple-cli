@@ -1,8 +1,18 @@
 <Project>
 
 	<PropertyGroup>
-		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
-		<BaseIntermediateOutputPath>$(SolutionDir)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+		<!--
+		$(MSBuildThisFileDirectory) is the repository root and is always defined. $(SolutionDir) is
+		only defined when MSBuild is invoked on the .sln, so using it here made project level
+		invocations (for example "dotnet pack src/SnapCLI.csproj") resolve the output paths relative
+		to the project directory and fail.
+
+		Each project gets its own bin/ and obj/ subdirectory so that parallel builds and test runs do
+		not write the same files.
+		-->
+		<RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+		<BaseOutputPath>$(RepoRoot)bin\$(MSBuildProjectName)\</BaseOutputPath>
+		<BaseIntermediateOutputPath>$(RepoRoot)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
 		<IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
 	</PropertyGroup>
 

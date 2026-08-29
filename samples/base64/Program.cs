@@ -34,8 +34,8 @@ Usage:
   base64 [command] [options]
 
 Options:
-  --version       Show version information
   -?, -h, --help  Show help and usage information
+  --version       Show version information
 
 Commands:
   encode <text>

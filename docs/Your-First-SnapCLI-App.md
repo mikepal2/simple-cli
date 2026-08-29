@@ -43,7 +43,7 @@ To use SnapCLI library you need to add nuget package to the project.
 
 [![Nuget](https://img.shields.io/nuget/v/SnapCLI.svg)](https://nuget.org/packages/SnapCLI)
 
-You can add it using IDE or from command line using command `dotnet add package SnapCLI --prerelease`.
+You can add it using IDE or from command line using command `dotnet add package SnapCLI`.
 
 ## Add some code
 
@@ -68,7 +68,7 @@ class Program
         ConsoleColor fgColor = ConsoleColor.White, 
         int repeat = 1)
     {
-        Concole.ForegroundColor = fgColor;
+        Console.ForegroundColor = fgColor;
         for (int i=0; i<repeat; i++)
             Console.WriteLine($"Hello {name}!");
     }
@@ -118,7 +118,7 @@ Now you don't need to specify `--name` when providing name argument on the comma
    <span style="color:lightgray">> myApp Michael</span><br>
    <span style="color:white">Hello Michael!</span><br>
    <br>
-   <span style="color:lightgray">> myApp Michael --color green</span><br>
+   <span style="color:lightgray">> myApp Michael --fg-color green</span><br>
    <span style="color:green">Hello Michael!</span><br>
  </p>
 
@@ -140,8 +140,8 @@ Options:
   --fg-color <Black|Blue|Cyan|DarkBlue|DarkCyan|DarkGray|DarkGreen|DarkMagenta|DarkRed|DarkYellow|Gray|Green|Magenta|Red|White|Yellow>  
                            [default: White]
   --repeat <repeat>        [default: 1]
-  --version                Show version information
   -?, -h, --help           Show help and usage information
+  --version                Show version information
 ```
 
 You can enhance it by providing descriptions. 
@@ -185,8 +185,8 @@ Options:
   --fg-color <Black|Blue|Cyan|DarkBlue|DarkCyan|DarkGray|DarkGreen|DarkMagenta|DarkRed|DarkYellow|Gray|Green|Magenta|Red|White|Yellow>  
                             Foreground color for console output [default: White]
   --repeat <repeat>         Number of lines to output [default: 1]
-  --version                 Show version information
   -?, -h, --help            Show help and usage information
+  --version                 Show version information
 ```
 
 

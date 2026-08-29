@@ -16,13 +16,15 @@ using SnapCLI;
 class Program
 {
     // global option with validation
+    // CommandLineInputException marks this as bad user input, so the default exception handler
+    // reports it as a short error message instead of a stack trace.
     [Option(Name = "file", Description = "An option whose argument is parsed as a FileInfo")]
     public static FileInfo file  {
         get { return _file; }
         set {
             if (!value.Exists)
-                throw new FileNotFoundException($"Specified file not found", value.FullName);
-            _file = value; 
+                throw new CommandLineInputException($"File not found: {value.FullName}");
+            _file = value;
         }
     }
     private static FileInfo _file = new FileInfo("sampleQuotes.txt");

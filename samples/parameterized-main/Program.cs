@@ -35,8 +35,8 @@ Arguments:
 Options:
   --fg-color <Black|Blue|Cyan|DarkBlue|DarkCyan|DarkGray|DarkGreen|DarkMagenta|DarkRed|DarkYellow|Gray|Green|Magenta|Red|White|Yellow>  [default: White]
   --repeat <repeat>                                                                                                                     [default: 1]
-  --version                                                                                                                             Show version information
   -?, -h, --help                                                                                                                        Show help and usage information
+  --version                                                                                                                             Show version information
 
 > parameterized-main Joe --fg-color Yellow --repeat 2
 Hello Joe!

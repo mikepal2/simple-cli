@@ -24,8 +24,8 @@ Usage:
 
 Options:
   --name <name>   [default: World]
-  --version       Show version information
   -?, -h, --help  Show help and usage information
+  --version       Show version information
 
 
 > minimal.exe

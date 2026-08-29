@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.*" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.*" />
+  </ItemGroup>
+
+  <!--
+  These tests launch the built executables as child processes, so the projects only need to be
+  built before this one, not referenced. ReferenceOutputAssembly="false" gives the build ordering
+  without pulling the assemblies in.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\minimal\minimal.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\samples\base64\base64.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\samples\quotes\quotes.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\samples\inventory\inventory.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\samples\parameterized-main\parameterized-main.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\samples\classic-main\classic-main.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\apps\shadow-name\shadow-name.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\apps\instance-option\instance-option.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+</Project>

@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+	  <PackageReference Include="System.CommandLine" Version="2.0.11" />
 	  <ProjectReference Include="..\..\src\SnapCLI.csproj" />
 	  <ProjectReference Include="..\UnitTestsLib\UnitTestsLib.csproj" />
   </ItemGroup>

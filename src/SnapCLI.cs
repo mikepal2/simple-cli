@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.IO;
+using System.CommandLine.Completions;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO;
@@ -23,24 +22,24 @@ namespace SnapCLI
     /// </remarks>
     /// <example>
     /// <code>
-    /// 
+    ///
     ///     [Command]
     ///     public static void Hello(
     ///         [Option(Name = "name", Description = "Person's name")]
     ///         string personName = "everyone"
-    ///     ) 
+    ///     )
     ///     {
     ///       Console.WriteLine($"Hello {personName}!");
     ///     }
-    /// 
+    ///
     /// </code>
-    /// 
+    ///
     /// Global option:
     /// <code>
-    /// 
+    ///
     ///     [Option(Name = "config", Description = "Specifies configuration file path")]
     ///     public static string g_configFile = "config.json";
-    /// 
+    ///
     /// </code>
     /// </example>
     /// </summary>
@@ -90,7 +89,9 @@ namespace SnapCLI
         public bool Hidden { get; set; }
 
         /// <summary>
-        /// Hidden options are not shown in help, but they can still be used on the command line.
+        /// Required options must be specified on the command line, otherwise an error is reported.
+        /// Parameters without a default value are required implicitly; setting this property forces
+        /// an option to be required even when a default value is available.
         /// </summary>
         public bool Required { get; set; }
 
@@ -104,16 +105,16 @@ namespace SnapCLI
     /// </remarks>
     /// <example>
     /// <code>
-    /// 
+    ///
     ///     [Command]
     ///     static public void Read(
-    ///         [Argument(Name = "path", Description = "Input file path")] 
+    ///         [Argument(Name = "path", Description = "Input file path")]
     ///         string filepath
-    ///     ) 
+    ///     )
     ///     {
-    ///       ... 
+    ///       ...
     ///     }
-    ///     
+    ///
     /// </code>
     /// </example>
     /// </summary>
@@ -161,20 +162,20 @@ namespace SnapCLI
     }
 
     /// <summary>
-    /// Declares <see cref = "RootCommand"/>, i.e. command that executed when no subcommands are present on the command line. 
+    /// Declares <see cref = "RootCommand"/>, i.e. command that executed when no subcommands are present on the command line.
     /// Only one method may be declared with this attribute.
     /// <remarks>
     /// <para>If program has only one method declared with <see cref = "CommandAttribute"/> and command name not explicitly specified in <c>name</c> attribute, this command is automatically treated as root command.</para>
     /// </remarks>
     /// <example>
     /// <code>
-    /// 
+    ///
     ///     [RootCommand]
-    ///     static public void Hello() 
+    ///     static public void Hello()
     ///     {
-    ///       ... 
+    ///       ...
     ///     }
-    ///     
+    ///
     /// </code>
     /// </example>
     /// </summary>
@@ -187,9 +188,9 @@ namespace SnapCLI
         public string? Description { get; set; }
 
         /// <summary>
-        /// A comma-separaed list of mutually exclusive options/arguments names. If there are multiple groups of mutually exclusive options/arguments, they must be enclosed in parentheses. Example: (option1,option2)(option3,arg1)
+        /// A comma-separated list of mutually exclusive options/arguments names. If there are multiple groups of mutually exclusive options/arguments, they must be enclosed in parentheses. Example: (option1,option2)(option3,arg1)
         /// </summary>
-        public string? MutuallyExclusuveOptionsArguments { get; set; }
+        public string? MutuallyExclusiveOptionsArguments { get; set; }
 
         /// <summary>
         /// Specifies the type (class) containing static properties and/or fields declared with the [Option] attribute to be added as global options at the root command level.
@@ -202,20 +203,20 @@ namespace SnapCLI
     }
 
     /// <summary>
-    /// Declares CLI <see cref = "Command"/>. 
+    /// Declares CLI <see cref = "Command"/>.
     /// <remarks>
     /// <para>Can be applied to any static public method</para>
     /// <para>If program has only one method declared with <see cref = "CommandAttribute"/> and command name not explicitly specified with <see cref="Name"/> property, this command is automatically treated as root command.</para>
     /// </remarks>
     /// <example>
     /// <code>
-    /// 
+    ///
     ///     [Command]
-    ///     static public void Hello() 
+    ///     static public void Hello()
     ///     {
-    ///       ... 
+    ///       ...
     ///     }
-    ///     
+    ///
     /// </code></example>
     /// </summary>
     /// <remarks>
@@ -224,7 +225,7 @@ namespace SnapCLI
     /// <item><description>If the name is not specified, the method name converted to kebab-case is used as the command name. For example, the method <c>HelloWorld()</c> will handle the <c>hello-world</c> command.</description></item>
     /// <item><description>If the method name is used and contains the underscore <c>_</c> character, it describes a subcommand. For example, the method <c>order_create()</c> is the subcommand <b>crate</b> of the <b>oreder</b> command.</description></item>
     /// <item><description>If the name is specified and contains spaces, it describes a subcommand. For example, <c>order list</c> is the subcommand <b>list</b> of the <b>order</b> command.</description></item>
-    /// </list>  
+    /// </list>
     /// </remarks>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Assembly, AllowMultiple = true)]
     public class CommandAttribute : Attribute
@@ -240,7 +241,7 @@ namespace SnapCLI
         public string? Description { get; set; }
 
         /// <summary>
-        /// A comma-separated list of aliases for the command. 
+        /// A comma-separated list of aliases for the command.
         /// </summary>
         public string? Aliases { get; set; }
 
@@ -250,9 +251,9 @@ namespace SnapCLI
         public bool Hidden { get; set; }
 
         /// <summary>
-        /// A comma-separaed list of mutually exclusive options/arguments names. If there are multiple groups of mutually exclusive options/arguments, they must be enclosed in parentheses. Example: (option1,option2)(option3,arg1)
+        /// A comma-separated list of mutually exclusive options/arguments names. If there are multiple groups of mutually exclusive options/arguments, they must be enclosed in parentheses. Example: (option1,option2)(option3,arg1)
         /// </summary>
-        public string? MutuallyExclusuveOptionsArguments { get; set; }
+        public string? MutuallyExclusiveOptionsArguments { get; set; }
 
         /// <summary>
         /// Specifies type (class) containing static properties and/or fields declared with [Option] attribute to be added as recursive options for the command.
@@ -273,10 +274,37 @@ namespace SnapCLI
         /// Initializes a new instance of the SnapCLI.AttributeUsageException class with a specified error message.
         /// </summary>
         public AttributeUsageException(string message) : base(message) { }
+        /// <summary>
+        /// Initializes a new instance of the SnapCLI.AttributeUsageException class with a specified error message and inner exception.
+        /// </summary>
+        public AttributeUsageException(string message, Exception innerException) : base(message, innerException) { }
     }
 
     /// <summary>
-    /// Declares startup method for CLI. The method must be public static and may have no parameters or one parameter of type <see cref = "CommandLineBuilder"/>.
+    /// Describes invalid input on the command line, as opposed to a failure inside the program.
+    /// The default exception handler reports these as a short error message without a stack trace.
+    /// </summary>
+    /// <remarks>
+    /// Derives from <see cref = "ArgumentException"/> so that existing <c>catch (ArgumentException)</c> handlers keep working.
+    /// </remarks>
+    public class CommandLineInputException : ArgumentException
+    {
+        /// <summary>
+        /// Initializes a new instance of the SnapCLI.CommandLineInputException class.
+        /// </summary>
+        public CommandLineInputException() : base() { }
+        /// <summary>
+        /// Initializes a new instance of the SnapCLI.CommandLineInputException class with a specified error message.
+        /// </summary>
+        public CommandLineInputException(string message) : base(message) { }
+        /// <summary>
+        /// Initializes a new instance of the SnapCLI.CommandLineInputException class with a specified error message and inner exception.
+        /// </summary>
+        public CommandLineInputException(string message, Exception innerException) : base(message, innerException) { }
+    }
+
+    /// <summary>
+    /// Declares startup method for CLI. The method must be public static and may have no parameters or one parameter of type <see cref = "InvocationConfiguration"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class StartupAttribute : Attribute
@@ -288,63 +316,13 @@ namespace SnapCLI
     /// </summary>
     public static class CLI
     {
-        private class ConsoleHelper : IConsole
-        {
-            private class StandardStreamWriter : IStandardStreamWriter
-            {
-                public StandardStreamWriter(TextWriter stream)
-                {
-                    Stream = stream;
-                }
-
-                public TextWriter Stream { get; }
-
-                public void Write(string? value)
-                {
-                    Stream.Write(value);
-                }
-            }
-
-            private ConsoleHelper(TextWriter? output, TextWriter? error)
-            {
-                Out = new StandardStreamWriter(output ?? Console.Out);
-                IsOutputRedirected = output != null;
-                Error = new StandardStreamWriter(error ?? Console.Error);
-                IsErrorRedirected = error != null;
-            }
-
-            public static IConsole? CreateOrDefault(TextWriter? output = null, TextWriter? error = null)
-            {
-                if (output == null && error == null)
-                    return null;
-                return new ConsoleHelper(output, error);
-            }
-
-            IStandardStreamWriter Out;
-            IStandardStreamWriter Error;
-
-            public bool IsOutputRedirected;
-
-            public bool IsErrorRedirected;
-
-            IStandardStreamWriter IStandardOut.Out => Out;
-
-            IStandardStreamWriter IStandardError.Error => Error;
-
-            bool IStandardOut.IsOutputRedirected => IsOutputRedirected;
-
-            bool IStandardError.IsErrorRedirected => IsErrorRedirected;
-
-            bool IStandardIn.IsInputRedirected => false;
-        }
-
         /// <summary>
         /// Arguments for the BeforeCommand event.
         /// </summary>
         public class BeforeCommandEventArguments
         {
             /// <summary>
-            /// Command line parse result. 
+            /// Command line parse result.
             /// </summary>
             public ParseResult ParseResult;
 
@@ -393,12 +371,19 @@ namespace SnapCLI
         /// </summary>
         public static event Action<AfterCommandEventArguments>? AfterCommand;
 
-        private static Parser Parser { get; }
-
         /// <summary>
         /// Provides access to commands hierarchy and their options and arguments.
         /// </summary>
-        public static RootCommand RootCommand { get; }
+        /// <exception cref = "AttributeUsageException">Attribute usage error detected while building the commands hierarchy.</exception>
+        public static RootCommand RootCommand
+        {
+            get
+            {
+                Initialize();
+                return _rootCommand!;
+            }
+        }
+        private static RootCommand? _rootCommand;
 
         /// <summary>
         /// Handler to use when exception is occured during command execution. Set <code>null</code> to suppress exception handling.
@@ -428,6 +413,18 @@ namespace SnapCLI
         }
         private static TextWriter? _error;
 
+        private static InvocationConfiguration _defaultInvocationConfig = new InvocationConfiguration();
+
+        private static (int exitCode, Exception? toRethrow) InvokeExceptionHandler(Exception ex)
+        {
+            if (ExceptionHandler != null)
+            {
+                try { return (ExceptionHandler(ex), null); }
+                catch (Exception handlerEx) { return (1, handlerEx); }
+            }
+            return (1, ex);
+        }
+
         private static int DefaultExceptionHandler(Exception exception)
         {
             switch (exception)
@@ -435,22 +432,34 @@ namespace SnapCLI
                 case OperationCanceledException _:
                     break;
 
+                // Bad input from the user and attribute misuse by the developer are both actionable
+                // without a stack trace, so report just the message.
+                case CommandLineInputException _:
+                case AttributeUsageException _:
+                    WriteError($"Error: {exception.Message}");
+                    break;
+
                 default:
-                    if (Error == Console.Error)
-                    {
-                        var color = Console.ForegroundColor;
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Error.WriteLine(exception.ToString());
-                        Console.ForegroundColor = color;
-                    }
-                    else
-                    {
-                        Error.WriteLine(exception.ToString());
-                    }
+                    WriteError(exception.ToString());
                     break;
             }
 
             return 1;
+
+            static void WriteError(string text)
+            {
+                if (Error == Console.Error)
+                {
+                    var color = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Error.WriteLine(text);
+                    Console.ForegroundColor = color;
+                }
+                else
+                {
+                    Error.WriteLine(text);
+                }
+            }
         }
 
         private class CommandDescriptor
@@ -460,7 +469,7 @@ namespace SnapCLI
             public readonly string? Description;
             public readonly Attribute Attribute;
             public readonly MethodInfo? Method;
-            public readonly string? MutuallyExclusuveOptionsArguments;
+            public readonly string? MutuallyExclusiveOptionsArguments;
             public readonly Type? RecursiveOptionsContainingType;
 
             public CommandDescriptor(CommandAttribute attribute, MethodInfo? method)
@@ -471,7 +480,7 @@ namespace SnapCLI
                 CommandName = attribute.Name
                     ?? method?.Name.Replace('_', ' ').ToKebabCase()
                     ?? throw new AttributeUsageException($"[Command] attribute declared at assembly level must have Name property specified");
-                MutuallyExclusuveOptionsArguments = attribute.MutuallyExclusuveOptionsArguments;
+                MutuallyExclusiveOptionsArguments = attribute.MutuallyExclusiveOptionsArguments;
                 Description = attribute.Description;
                 RecursiveOptionsContainingType = attribute.RecursiveOptionsContainingType;
             }
@@ -480,7 +489,7 @@ namespace SnapCLI
             {
                 Method = method;
                 Attribute = attribute;
-                MutuallyExclusuveOptionsArguments = attribute.MutuallyExclusuveOptionsArguments;
+                MutuallyExclusiveOptionsArguments = attribute.MutuallyExclusiveOptionsArguments;
                 Description = attribute.Description;
                 CommandName = RootCommand.ExecutableName;
                 RecursiveOptionsContainingType = attribute.GlobalOptionsContainingType;
@@ -496,18 +505,21 @@ namespace SnapCLI
         /// <returns></returns>
         public static int Run(string[]? args = null, TextWriter? output = null, TextWriter? error = null)
         {
+            _error = error;
             try
             {
-                _error = error;
-                var parseResult = Parser.Parse(args ?? Environment.GetCommandLineArgs().Skip(1).ToArray());
-                return parseResult.Invoke(ConsoleHelper.CreateOrDefault(output, error));
+                Initialize();
+                var parseResult = RootCommand.Parse(args ?? Environment.GetCommandLineArgs().Skip(1).ToArray());
+                return parseResult.Invoke(CreateInvocationConfig(output, error));
             }
             catch (Exception ex)
             {
-                if (ExceptionHandler != null)
-                    return ExceptionHandler(ex);
-                ExceptionDispatchInfo.Capture(ex).Throw();
-                return 1;
+                // Covers failures raised outside the command action: building the commands hierarchy,
+                // tokenizing/parsing, and default value factories evaluated during parsing.
+                var (exitCode, toRethrow) = InvokeExceptionHandler(ex);
+                if (toRethrow != null)
+                    ExceptionDispatchInfo.Capture(toRethrow).Throw();
+                return exitCode;
             }
         }
 
@@ -520,25 +532,45 @@ namespace SnapCLI
         /// <returns></returns>
         public static async Task<int> RunAsync(string[]? args = null, TextWriter? output = null, TextWriter? error = null)
         {
+            _error = error;
             try
             {
-                _error = error;
-                var parseResult = Parser.Parse(args ?? Environment.GetCommandLineArgs().Skip(1).ToArray());
-                return await parseResult.InvokeAsync(ConsoleHelper.CreateOrDefault(output, error));
+                Initialize();
+                var parseResult = RootCommand.Parse(args ?? Environment.GetCommandLineArgs().Skip(1).ToArray());
+                return await parseResult.InvokeAsync(CreateInvocationConfig(output, error), CancellationToken.None);
             }
             catch (Exception ex)
             {
-                if (ExceptionHandler != null)
-                    return ExceptionHandler(ex);
-                ExceptionDispatchInfo.Capture(ex).Throw();
-                return 1;
+                // Covers failures raised outside the command action: building the commands hierarchy,
+                // tokenizing/parsing, and default value factories evaluated during parsing.
+                var (exitCode, toRethrow) = InvokeExceptionHandler(ex);
+                if (toRethrow != null)
+                    ExceptionDispatchInfo.Capture(toRethrow).Throw();
+                return exitCode;
             }
+        }
+
+        private static InvocationConfiguration CreateInvocationConfig(TextWriter? output, TextWriter? error)
+        {
+            if (output == null && error == null)
+                return _defaultInvocationConfig;
+
+            // Shallow-copy every writable property so that anything a [Startup] method configured is
+            // preserved, then apply the caller's stream redirections on top.
+            var config = new InvocationConfiguration();
+            foreach (var prop in typeof(InvocationConfiguration).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                if (prop.CanRead && prop.CanWrite)
+                    prop.SetValue(config, prop.GetValue(_defaultInvocationConfig));
+
+            if (output != null) config.Output = output;
+            if (error != null) config.Error = error;
+            return config;
         }
 
         private static Dictionary<object, object> _bindings = new Dictionary<object, object>();
 
         /// <summary>
-        /// The library using attributes on methods, properies, fields and parameters to create CommandLine parser commands, options and arguments. 
+        /// The library using attributes on methods, properies, fields and parameters to create CommandLine parser commands, options and arguments.
         /// This method returns corresponding entity info (method, propery, field ot parameter) binded to specified CommandLine object.
         /// </summary>
         /// <param name = "commandLineObject">One of CommandLine parser objects: <see cref = "Command"/>, <see cref = "Option"/> or <see cref = "Argument"/>.</param>
@@ -552,9 +584,9 @@ namespace SnapCLI
         }
 
         /// <summary>
-        /// The library using attributes on methods, properies, fields and parameters to create CommandLine parser commands, options and arguments. 
+        /// The library using attributes on methods, properies, fields and parameters to create CommandLine parser commands, options and arguments.
         /// This method returns <see cref = "ICustomAttributeProvider"/> for corresponding entity (method, propery, field ot parameter) binded to specified CommandLine object.
-        /// Return binding CommandLine parser object to 
+        /// Return binding CommandLine parser object to
         /// </summary>
         /// <param name = "commandLineObject">One of CommandLine parser objects: <see cref = "Command"/>, <see cref = "Option"/> or <see cref = "Argument"/>.</param>
         /// <returns>The entity binded to CommandLine parser object <see cref = "MethodInfo"/>, <see cref = "PropertyInfo"/>, <see cref = "FieldInfo"/> or <see cref = "ParameterInfo"/>. Returns <code>null</code> if binding not found.</returns>
@@ -564,7 +596,7 @@ namespace SnapCLI
         }
 
         // all recursive options, i.e. properties and fields described with [Option] attribute
-        private static readonly List<RecursiveOption> recursiveOptions;
+        private static List<RecursiveOption> recursiveOptions = new List<RecursiveOption>();
 
         private class RecursiveOption
         {
@@ -579,8 +611,8 @@ namespace SnapCLI
                     case PropertyInfo prop:
                         if (!prop.CanWrite)
                             throw new AttributeUsageException($"Property {prop.Name} declared as [Option] must be writable");
-                        if (!prop.SetMethod?.IsStatic == null)
-                            throw new AttributeUsageException($"Property {prop.Name} declared as [Option] must be static");
+                        if (prop.GetMethod?.IsStatic != true || prop.SetMethod?.IsStatic != true)
+                            throw new AttributeUsageException($"Property {GetFullTypeName(containingType)}.{prop.Name} declared as [Option] must be static");
                         CliOption = CreateOption(attr, prop.Name, prop.PropertyType, () => prop.GetValue(null));
                         break;
                     case FieldInfo field:
@@ -601,10 +633,16 @@ namespace SnapCLI
 
             public void SetValueFromCommandLine()
             {
-                var optionResult = ParseResult.FindResultFor(CliOption);
-                if (optionResult == null)
+                var optionResult = ParseResult.GetResult(CliOption);
+
+                // System.CommandLine produces an implicit result carrying the option's default value even
+                // when the option is absent from the command line. Writing that back would re-run the
+                // property setter (and any validation in it) on every invocation, so skip it and leave the
+                // property or field holding the value its own initializer gave it.
+                if (optionResult == null || optionResult.Implicit)
                     return;
-                var value = optionResult.GetValueOrDefault();
+
+                var value = GetValueOrDefault(optionResult, CliOption.ValueType);
                 switch (Binding)
                 {
                     case PropertyInfo prop:
@@ -637,10 +675,35 @@ namespace SnapCLI
             }
         };
 
+        // Initialization state. The commands hierarchy is built lazily rather than from a static
+        // constructor: a failing static constructor would surface every attribute usage error as an
+        // opaque TypeInitializationException that callers cannot intercept, because touching any
+        // member of CLI (including ExceptionHandler) re-throws it.
+        private static bool _initializing;
+        private static bool _initialized;
+
         /// <summary>
-        /// Static constructor, initializes commands hierarchy from attributes.
+        /// Builds the commands hierarchy from the attributes declared in the entry assembly.
+        /// Called automatically by <see cref = "Run"/>, <see cref = "RunAsync"/> and <see cref = "RootCommand"/>;
+        /// calling it explicitly is only useful to surface attribute usage errors early.
         /// </summary>
         /// <exception cref = "AttributeUsageException">Attribute usage error detected.</exception>
+        public static void Initialize()
+        {
+            if (_initialized || _initializing)
+                return;
+            _initializing = true;
+            try
+            {
+                BuildCommandsHierarchy();
+                _initialized = true;
+            }
+            finally
+            {
+                _initializing = false;
+            }
+        }
+
         static CLI()
         {
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
@@ -648,7 +711,10 @@ namespace SnapCLI
                 if (ExceptionHandler != null && args.ExceptionObject is Exception ex)
                     Environment.ExitCode = ExceptionHandler.Invoke(ex);
             };
+        }
 
+        private static void BuildCommandsHierarchy()
+        {
             Assembly executingAssembly = Assembly.GetExecutingAssembly();
             Assembly assembly = Assembly.GetEntryAssembly() ?? executingAssembly;
 
@@ -707,16 +773,17 @@ namespace SnapCLI
             string rootCommadDescription = rootCommandDescriptor?.Description
                 ?? GetCustomAttribute<Assembly, AssemblyDescriptionAttribute>(assembly)?.Description
                 ?? "";
-            RootCommand = new RootCommand(rootCommadDescription);
+            var rootCommand = new RootCommand(rootCommadDescription);
+            _rootCommand = rootCommand;
 
             if (rootCommandDescriptor?.Method != null)
             {
-                AddCommandHandler(RootCommand, rootCommandDescriptor.Method, rootCommandDescriptor.MutuallyExclusuveOptionsArguments);
-                _bindings.Add(RootCommand, rootCommandDescriptor.Method);
+                AddCommandHandler(rootCommand, rootCommandDescriptor.Method, rootCommandDescriptor.MutuallyExclusiveOptionsArguments);
+                _bindings.Add(rootCommand, rootCommandDescriptor.Method);
             }
             else
             {
-                _bindings.Add(RootCommand, assembly);
+                _bindings.Add(rootCommand, assembly);
             }
 
             var globalOptions = rootCommandDescriptor?.RecursiveOptionsContainingType != null ?
@@ -724,44 +791,58 @@ namespace SnapCLI
                 recursiveOptions.Where(x => !commandDescriptors.Any(d => d.RecursiveOptionsContainingType == x.ContainingType)); // use all options from types not specified as RecursiveOptionsContainingType
 
             foreach (var opt in globalOptions)
-                RootCommand.AddGlobalOption(opt.CliOption);
+            {
+                opt.CliOption.Recursive = true;
+                rootCommand.Add(opt.CliOption);
+            }
 
             // add subcommands
 
             var subcommands = commandDescriptors
                 .OrderBy(desc => desc.CommandName.Length) // sort by name length to ensure parent commands created before subcommands
-                .Select(desc => CreateCommand(RootCommand, desc))
+                .Select(desc => CreateCommand(rootCommand, desc))
                 .ToArray();
 
             // validate subcommands
 
             foreach (var command in subcommands)
-                if (command.Subcommands.Count == 0 && command.Handler == null && command.IsHidden == false)
+                if (command.Subcommands.Count == 0 && command.Action == null && command.Hidden == false)
                     throw new AttributeUsageException($"Command '{command.Name}' has no subcommands nor handler methods");
 
-            var builder = new CommandLineBuilder(RootCommand);
+            // System.CommandLine builds a single token table from the root command name and all of its
+            // immediate subcommand names, so a top level command that shadows the executable name makes
+            // every parse throw an obscure duplicate key error. Report it here instead.
+            foreach (var command in rootCommand.Subcommands)
+                foreach (var token in new[] { command.Name }.Concat(command.Aliases))
+                    if (string.Equals(token, RootCommand.ExecutableName, StringComparison.Ordinal))
+                        throw new AttributeUsageException(
+                            $"Command '{token}' has the same name as the executable '{RootCommand.ExecutableName}'. " +
+                            "A top level command cannot shadow the executable name; rename the command or the assembly (see <AssemblyName> in the project file).");
 
-            // call [Startup] methods
+            // set up default invocation configuration — SnapCLI handles exceptions itself
+            _defaultInvocationConfig = new InvocationConfiguration
+            {
+                EnableDefaultExceptionHandler = false
+            };
 
-            var startupMethods = GetCallbackMethodsByAttribute<StartupAttribute>(assembly, bindingFlags, paramTypes: new Type[] { typeof(CommandLineBuilder) }, paramsAreOptional: true);
+            // Always add standard directives
+            rootCommand.Add(new EnvironmentVariablesDirective());
+            rootCommand.Add(new DiagramDirective());
+            rootCommand.Add(new SuggestDirective());
 
-            bool useDefaults = true;
+            // call [Startup] methods — parameterless or accepting InvocationConfiguration
+            var startupMethods = GetCallbackMethodsByAttribute<StartupAttribute>(assembly, bindingFlags, paramTypes: new Type[] { typeof(InvocationConfiguration) }, paramsAreOptional: true);
+
             if (startupMethods.Any())
             {
-                var _params = new object[] { builder };
                 foreach (var method in startupMethods)
                 {
                     try
                     {
                         if (method.GetParameters().Length > 0)
-                        {
-                            useDefaults = false; // this startup method is responsible for builder configuration
-                            method.Invoke(null, new object[] { builder });
-                        }
+                            method.Invoke(null, new object[] { _defaultInvocationConfig });
                         else
-                        {
                             method.Invoke(null, null);
-                        }
                     }
                     catch (TargetInvocationException ex) when (ex.InnerException != null)
                     {
@@ -769,22 +850,6 @@ namespace SnapCLI
                     }
                 }
             }
-
-            if (useDefaults)
-            {
-                // use all from .UseDefaults() except .UseExceptionHandler()
-                builder.UseVersionOption()
-                       .UseHelp()
-                       .UseEnvironmentVariableDirective()
-                       .UseParseDirective()
-                       .UseSuggestDirective()
-                       .RegisterWithDotnetSuggest()
-                       .UseTypoCorrections()
-                       .UseParseErrorReporting()
-                       .CancelOnProcessTermination();
-            }
-
-            Parser = builder.Build();
         }
 
         // find all declared [RootCommand] and [Command] attributes
@@ -814,7 +879,7 @@ namespace SnapCLI
                 var commandAttributes = GetCustomAttributes<MethodInfo, CommandAttribute>(method).ToArray();
                 if (commandAttributes.Length == 0)
                 {
-                    if (method.IsStatic && method.Name == "Main" 
+                    if (method.IsStatic && method.Name == "Main"
                         && rootCommand?.Method != method
                         && !(new StackTrace(1, true)).GetFrames().Any(f => f.GetMethod() == method) // skip methods from current stack to support call from "classic" Main
                         )
@@ -845,10 +910,10 @@ namespace SnapCLI
                 rootCommand = commands.First();
                 commands.Clear();
             }
-            
+
             // If program has no methods declared with [Command] or [RootCommand] attributes,
             // then the Main() method is automatically treated as root command handler.
-            // NOTE: If 
+            // NOTE: a Main() method that is present alongside command handlers is an error, see below.
             if (mainMethods.Count > 0)
             {
                 if (mainMethods.Count > 1)
@@ -902,7 +967,7 @@ namespace SnapCLI
 
             foreach (var method in methods)
             {
-                var attributeName = typeof(T).Name.Replace("Attrubute", "");
+                var attributeName = typeof(T).Name.Replace("Attribute", "");
                 if (!method.IsStatic)
                     throw new AttributeUsageException($"Method {method.Name} declared as [{attributeName}] must be static");
 
@@ -947,7 +1012,7 @@ namespace SnapCLI
             bool created = false;
             foreach (var (subName, i) in subcommandNames.Select((n, i) => (n, i)))
             {
-                command = parentCommand.Subcommands.FirstOrDefault(c => string.Compare(subName, c.Name, StringComparison.Ordinal) == 0 || c.HasAlias(subName));
+                command = parentCommand.Subcommands.FirstOrDefault(c => string.Compare(subName, c.Name, StringComparison.Ordinal) == 0 || c.Aliases.Contains(subName));
                 if (command == null)
                 {
                     bool isLast = (i == subcommandNames.Length - 1);
@@ -962,15 +1027,23 @@ namespace SnapCLI
             if (!created)
                 throw new AttributeUsageException($"Command '{name}' has multiple [Command] definitions");
             foreach (var alias in SplitNames(attr.Aliases))
-                command.AddAlias(alias);
-            command.IsHidden = attr.Hidden;
+                command.Aliases.Add(alias);
+            command.Hidden = attr.Hidden;
 
             if (desc.Method != null)
-                AddCommandHandler(command, desc.Method, desc.MutuallyExclusuveOptionsArguments);
+            {
+                AddCommandHandler(command, desc.Method, desc.MutuallyExclusiveOptionsArguments);
+                // GetBinding() is documented to return the declaring entity for any command, not just
+                // the root one, so record the handler method here as well.
+                _bindings[command] = desc.Method;
+            }
 
             if (desc.RecursiveOptionsContainingType != null)
                 foreach (var opt in recursiveOptions.Where(x => x.ContainingType == desc.RecursiveOptionsContainingType))
-                    command.AddGlobalOption(opt.CliOption);
+                {
+                    opt.CliOption.Recursive = true;
+                    command.Add(opt.CliOption);
+                }
 
             return command;
         }
@@ -986,14 +1059,12 @@ namespace SnapCLI
         }
 
         private static readonly Type[] SupportedReturnTypes = new[] { typeof(void), typeof(int), typeof(Task<int>), typeof(Task)
-#if NETCOREAPP2_0_OR_GREATER
             , typeof(ValueTask<int>), typeof(ValueTask)
-#endif
         };
 
-        private static void AddCommandHandler(Command command, MethodInfo method, string? mutuallyExclusuveOptionsArguments)
+        private static void AddCommandHandler(Command command, MethodInfo method, string? mutuallyExclusiveOptionsArguments)
         {
-            if (command.Handler != null)
+            if (command.Action != null)
                 throw new AttributeUsageException($"Command '{command.Name}' has multiple handler methods");
 
             if (!method.IsStatic)
@@ -1009,7 +1080,7 @@ namespace SnapCLI
                 var opt = GetCustomAttribute<ParameterInfo, OptionAttribute>(param);
                 var arg = GetCustomAttribute<ParameterInfo, ArgumentAttribute>(param);
                 if (opt != null && arg != null)
-                    throw new AttributeUsageException($"Parameter {param.Name} of method {method.Name} declared as both [Opton] and [Argument]");
+                    throw new AttributeUsageException($"Parameter {param.Name} of method {method.Name} declared as both [Option] and [Argument]");
 
                 Func<object?>? getDefaultValue = null;
                 if (param.HasDefaultValue)
@@ -1018,94 +1089,155 @@ namespace SnapCLI
                 if (arg != null)
                 {
                     var argument = CreateArgument(arg, param.Name, param.ParameterType, getDefaultValue);
-                    command.AddArgument(argument);
+                    command.Add(argument);
                     paramInfo.Add(argument);
                     _bindings.Add(argument, param);
                 }
                 else
                 {
                     var option = CreateOption(opt ?? new OptionAttribute(), param.Name, param.ParameterType, getDefaultValue);
-                    command.AddOption(option);
+                    command.Add(option);
                     paramInfo.Add(option);
                     _bindings.Add(option, param);
                 }
             }
 
-            command.SetHandler(async (ctx) =>
+            command.SetAction(async (parseResult, cancellationToken) =>
             {
-                ParseResult = ctx.ParseResult;
-                CancellationToken = ctx.GetCancellationToken();
+                ParseResult = parseResult;
+                CancellationToken = cancellationToken;
 
-                foreach (var opt in recursiveOptions)
-                    opt.SetValueFromCommandLine();
-
-                var methodParams = paramInfo.Select(param =>
-                {
-                    switch (param)
-                    {
-                        case Option opt:
-                            return ctx.ParseResult.GetValueForOption(opt);
-                        case Argument arg:
-                            return ctx.ParseResult.GetValueForArgument(arg);
-                        default:
-                            throw new InvalidOperationException();
-                    }
-                }).ToArray();
-
-                if (mutuallyExclusuveOptionsArguments != null)
-                    ParseResult.ValidateMutuallyExclusiveOptionsArguments(mutuallyExclusuveOptionsArguments);
-
+                int exitCode = 0;
+                Exception? exceptionToRethrow = null;
                 try
                 {
-                    var beforeCommandEventArguments = new BeforeCommandEventArguments(ctx.ParseResult);
+                    // Binding global/recursive options runs user code (property setters), and reading
+                    // parameter values can evaluate default value factories, so both must be covered
+                    // by the exception handler.
+                    foreach (var opt in recursiveOptions)
+                        opt.SetValueFromCommandLine();
+
+                    var methodParams = paramInfo.Select(param =>
+                    {
+                        switch (param)
+                        {
+                            case Option opt:
+                                return GetSymbolValue(parseResult, opt);
+                            case Argument arg:
+                                return GetSymbolValue(parseResult, arg);
+                            default:
+                                throw new InvalidOperationException();
+                        }
+                    }).ToArray();
+
+                    if (mutuallyExclusiveOptionsArguments != null)
+                        ParseResult.ValidateMutuallyExclusiveOptionsArguments(mutuallyExclusiveOptionsArguments);
+
+                    var beforeCommandEventArguments = new BeforeCommandEventArguments(parseResult);
                     BeforeCommand?.Invoke(beforeCommandEventArguments);
 
-                    var awaitable = method.Invoke(null, methodParams)!;
+                    var awaitable = method.Invoke(null, methodParams);
 
                     if (awaitable == null)
                     {
-                        ctx.ExitCode = 0;
+                        exitCode = 0;
                     }
                     else
                     {
                         switch (awaitable)
                         {
                             case Task<int> t:
-                                ctx.ExitCode = await t;
+                                exitCode = await t;
                                 break;
                             case Task t:
                                 await t;
-                                ctx.ExitCode = 0;
+                                exitCode = 0;
                                 break;
-#if NETCOREAPP2_0_OR_GREATER
                             case ValueTask<int> t:
-                                ctx.ExitCode = await t;
+                                exitCode = await t;
                                 break;
                             case ValueTask t:
                                 await t;
-                                ctx.ExitCode = 0;
+                                exitCode = 0;
                                 break;
-#endif
                             case int i:
-                                ctx.ExitCode = i;
+                                exitCode = i;
                                 break;
                             default:
                                 // should not be here because of SupportedReturnTypes check above
                                 throw new InvalidOperationException();
                         }
                     }
-
-                    var afterCommandEventArguments = new AfterCommandEventArguments(ctx.ParseResult, ctx.ExitCode);
-                    AfterCommand?.Invoke(afterCommandEventArguments);
-
-                    // AfterCommand event handler(s) may change exit code
-                    ctx.ExitCode = afterCommandEventArguments.ExitCode;
                 }
                 catch (TargetInvocationException ex) when (ex.InnerException != null)
                 {
-                    ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                    (exitCode, exceptionToRethrow) = InvokeExceptionHandler(ex.InnerException);
                 }
+                catch (Exception ex)
+                {
+                    (exitCode, exceptionToRethrow) = InvokeExceptionHandler(ex);
+                }
+
+                // AfterCommand fires unconditionally, even when an exception occurred
+                var afterCommandEventArguments = new AfterCommandEventArguments(parseResult, exitCode);
+                AfterCommand?.Invoke(afterCommandEventArguments);
+                exitCode = afterCommandEventArguments.ExitCode;
+
+                if (exceptionToRethrow != null)
+                    ExceptionDispatchInfo.Capture(exceptionToRethrow).Throw();
+
+                return exitCode;
             });
+        }
+
+        private static object? GetSymbolValue(ParseResult parseResult, Symbol symbol)
+        {
+            var result = parseResult.GetResult(symbol);
+            if (result == null)
+            {
+                switch (symbol)
+                {
+                    case Option opt: return opt.GetDefaultValue();
+                    case Argument arg: return arg.GetDefaultValue();
+                    default: return null;
+                }
+            }
+
+            var valueType = symbol switch
+            {
+                Option opt => opt.ValueType,
+                Argument arg => arg.ValueType,
+                _ => typeof(object)
+            };
+
+            return GetValueOrDefault(result, valueType);
+        }
+
+        // OptionResult/ArgumentResult only expose the strongly typed GetValueOrDefault<T>(), while the
+        // value type is known only at runtime, so the call is bound reflectively. Resolved methods are
+        // cached because this runs for every parameter of every invocation.
+        private static readonly Dictionary<(Type resultType, Type valueType), MethodInfo> _getValueMethods
+            = new Dictionary<(Type, Type), MethodInfo>();
+
+        private static object? GetValueOrDefault(SymbolResult result, Type valueType)
+        {
+            var key = (result.GetType(), valueType);
+            MethodInfo? method;
+            lock (_getValueMethods)
+            {
+                if (!_getValueMethods.TryGetValue(key, out method))
+                {
+                    var definition = key.Item1.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                        .FirstOrDefault(m => m.Name == "GetValueOrDefault"
+                                          && m.IsGenericMethodDefinition
+                                          && m.GetGenericArguments().Length == 1
+                                          && m.GetParameters().Length == 0)
+                        ?? throw new MissingMethodException(key.Item1.FullName, "GetValueOrDefault");
+                    method = definition.MakeGenericMethod(valueType);
+                    _getValueMethods[key] = method;
+                }
+            }
+            return method.Invoke(result, null);
         }
 
         private static string GetFullTypeName(Type type)
@@ -1126,18 +1258,20 @@ namespace SnapCLI
             var genericType = typeof(Option<>).MakeGenericType(new[] { valueType });
             var name = info.Name ?? memberName?.ToKebabCase() ?? throw new NotSupportedException($"Option name cannot be deduced from parameter [{info}], specify name explicitly");
             name = AddPrefix(name);
-            Option instance = (Option)Activator.CreateInstance(genericType, new[] { name, info.Description })!;
+            Option instance = (Option)Activator.CreateInstance(genericType, new object[] { name, Array.Empty<string>() })!;
+            if (info.Description != null)
+                instance.Description = info.Description;
             if (info.Arity.HasValue)
                 instance.Arity = info.Arity.Value;
             if (info.HelpName != null)
-                instance.ArgumentHelpName = info.HelpName;
-            instance.IsHidden = info.Hidden;
+                instance.HelpName = info.HelpName;
+            instance.Hidden = info.Hidden;
             foreach (var alias in SplitNames(info.Aliases))
-                instance.AddAlias(AddPrefix(alias));
+                instance.Aliases.Add(AddPrefix(alias));
             if (info.Required == false && getDefaultValue != null)
-                instance.SetDefaultValueFactory(getDefaultValue);
+                SetDefaultValueFactory(instance, valueType, getDefaultValue);
             else
-                instance.IsRequired = true;
+                instance.Required = true;
             return instance;
 
             static string AddPrefix(string name)
@@ -1154,15 +1288,31 @@ namespace SnapCLI
         {
             var genericType = typeof(Argument<>).MakeGenericType(new[] { valueType });
             var name = info.Name ?? memberName?.ToKebabCase() ?? throw new NotSupportedException($"Argument name cannot be deduced from parameter [{info}], specify name explicitly");
-            Argument instance = (Argument)Activator.CreateInstance(genericType, new[] { name, info.Description })!;
+            Argument instance = (Argument)Activator.CreateInstance(genericType, new object[] { name })!;
+            if (info.Description != null)
+                instance.Description = info.Description;
             if (info.Arity.HasValue)
                 instance.Arity = info.Arity.Value;
             if (info.HelpName != null)
                 instance.HelpName = info.HelpName;
-            instance.IsHidden = info.Hidden;
+            instance.Hidden = info.Hidden;
             if (getDefaultValue != null)
-                instance.SetDefaultValueFactory(getDefaultValue);
+                SetDefaultValueFactory(instance, valueType, getDefaultValue);
             return instance;
+        }
+
+        private static void SetDefaultValueFactory(object instance, Type valueType, Func<object?> getDefaultValue)
+        {
+            var factory = typeof(CLI)
+                .GetMethod(nameof(CreateTypedDefaultValueFactory), BindingFlags.NonPublic | BindingFlags.Static)!
+                .MakeGenericMethod(valueType)
+                .Invoke(null, new object[] { getDefaultValue });
+            instance.GetType().GetProperty("DefaultValueFactory")!.SetValue(instance, factory);
+        }
+
+        private static Func<ArgumentResult, T> CreateTypedDefaultValueFactory<T>(Func<object?> getDefaultValue)
+        {
+            return _ => (T)getDefaultValue()!;
         }
 
         private static string ToKebabCase(this string str)

@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+		<!-- Shared helper library for the test projects, it contains no tests of its own. -->
+		<IsTestProject>false</IsTestProject>
+		<IsPackable>false</IsPackable>
   </PropertyGroup>
 
 	<ItemGroup>

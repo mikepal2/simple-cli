@@ -7,7 +7,7 @@ namespace Tests
     public class UnitTestMain : SnapCliUnitTest
     {
         [TestMethod]
-        [DataRow("", "'--option1' is required")]
+        [DataRow("", "Required argument missing")]
         [DataRow("--option1 true", "Required argument missing")]
         [DataRow("--option1 true 2", "[testhost(True,2,1,arg2)]")]
         [DataRow("--option1 true 2 a2", "[testhost(True,2,1,a2)]")]

@@ -1,27 +1,54 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+		<!-- Matches the frameworks supported by System.CommandLine. -->
+		<TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<LangVersion>8.0</LangVersion>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Authors>Michael Pavlushik</Authors>
+		<Copyright>Copyright (c) Michael Pavlushik</Copyright>
 		<Description>Quickly create POSIX-like Command Line Interface (CLI) applications using a simple metadata API built on top of the System.CommandLine library.</Description>
 		<RepositoryUrl>https://github.com/mikepal2/snap-cli</RepositoryUrl>
-		<Version>2.1.0-pre</Version>
+		<RepositoryType>git</RepositoryType>
+		<Version>3.0.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/mikepal2/snap-cli</PackageProjectUrl>
 		<PackageTags>Snap CLI Command Line Interface CommandLine Framework Quick Simple Easy</PackageTags>
-		<PackageReleaseNotes>Add parameterized Main() support</PackageReleaseNotes>
+		<PackageReleaseNotes>Upgrade to System.CommandLine 2.0.11 stable release. [Startup] method parameter type changed from CommandLineBuilder to InvocationConfiguration. Breaking: the misspelled MutuallyExclusuveOptionsArguments property of [Command] and [RootCommand] is renamed to MutuallyExclusiveOptionsArguments; the old name is removed. Target frameworks changed to netstandard2.0 and net8.0.</PackageReleaseNotes>
+
+		<!-- Symbols and source stepping for consumers. -->
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+	</PropertyGroup>
+
+	<!-- Reproducible binaries when building on a build server. -->
+	<PropertyGroup Condition="'$(CI)' == 'true' or '$(GITHUB_ACTIONS)' == 'true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+		<PackageReference Include="System.CommandLine" Version="2.0.11" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+	</ItemGroup>
+
+	<!--
+	Provides ValueTask on netstandard2.0, so that handler return types behave identically on both
+	target frameworks rather than ValueTask being supported only on net8.0.
+	-->
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="build/*" PackagePath="build/$(TargetFramework)" />
+		<!--
+		build/ (without a framework folder) applies to every target framework, which is what these
+		files need: they generate the program entry point regardless of the consumer's TFM.
+		-->
+		<Content Include="build/*" PackagePath="build/" />
 	</ItemGroup>
 
 	<ItemGroup>
